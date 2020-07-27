@@ -4,9 +4,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.jijang.book.springboot.web.domain.posts.Posts;
 import com.jijang.book.springboot.web.domain.posts.PostsRepository;
+import com.jijang.book.springboot.web.dto.PostsResponseDto;
 import com.jijang.book.springboot.web.dto.PostsSaveRequestDto;
 import com.jijang.book.springboot.web.dto.PostsUpdateRequestDto;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import javax.servlet.http.HttpServletRequest;
 import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -66,6 +70,30 @@ public class PostsApiControllerTest {
   }
 
   @Test
+  public void Posts_조회한다() throws Exception {
+    //given
+    Posts savedPosts = postsRepository.save(Posts.builder().title("title").content("content").author("author").build());
+
+    Long postsId = savedPosts.getId();
+
+    String expectedTitle = "title";
+    String expectedContent = "content";
+
+    String url = "http://localhost:" + port + "/api/v1/posts/" + postsId;
+
+    //when
+    ResponseEntity<Posts> responseEntity = restTemplate.getForEntity(url, Posts.class);
+
+    //then
+    assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+    assertThat(Objects.requireNonNull(responseEntity.getBody()).getTitle()).isEqualTo(expectedTitle);
+    assertThat(Objects.requireNonNull(responseEntity.getBody()).getContent()).isEqualTo(expectedContent);
+
+
+  }
+
+  @Test
   public void Posts_수정된다() throws Exception {
     //given
     Posts savedPosts = postsRepository.save(Posts.builder().title("title").content("content").author("author").build());
@@ -91,6 +119,24 @@ public class PostsApiControllerTest {
     List<Posts> all = postsRepository.findAll();
     assertThat(all.get(0).getTitle()).isEqualTo(expectedTitle);
     assertThat(all.get(0).getContent()).isEqualTo(expectedContent);
+  }
+
+  @Test
+  public void Posts_삭제된다() throws Exception {
+    //given
+    Posts savedPosts = postsRepository.save(Posts.builder().title("title").content("content").author("author").build());
+
+    Long deleteId = savedPosts.getId();
+
+    String url = "http://localhost:" + port + "/api/v1/posts/" + deleteId;
+
+    //when
+    restTemplate.delete(url, deleteId);
+
+    //then
+    List<Posts> all = postsRepository.findAll();
+    assertThat(all.size()).isEqualTo(0);
+
   }
 
 }
