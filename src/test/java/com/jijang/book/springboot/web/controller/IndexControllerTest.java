@@ -34,32 +34,6 @@ public class IndexControllerTest {
     //then
     assertThat(body).contains("스프링 부트로 시작하는 웹 서비스");
   }
-
-
-  @Test
-  public void 저장페이지_로딩() {
-    //when
-    String body = this.restTemplate.getForObject("/posts/save", String.class);
-
-    //then
-    assertThat(body).contains("게시글 등록");
-
-  }
-
-  @Test
-  public void 수정페이지_로딩() {
-    //given
-    Posts savedPosts = postsRepository.save(Posts.builder().title("title").content("content").author("author").build());
-
-    Long updatedId = savedPosts.getId();
-
-    //when
-    String body = this.restTemplate.getForObject("/posts/update/" + updatedId, String.class);
-
-    //then
-    assertThat(body).contains("게시글 수정");
-
-  }
 }
 
 
